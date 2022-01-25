@@ -1,0 +1,45 @@
+body {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+}
+
+main {
+  width: 69%;
+  border: 1px solid;
+  display: flex;
+  flex-flow: row wrap;
+  padding-bottom: 20px;
+}
+
+aside {
+  width: 29%;
+  border: 1px solid;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.random-game,
+.find-game {
+  width: 50%;
+}
+
+.search-result {
+  width: 100%;
+}
+
+h1 {
+  text-align: center;
+  width: 100%;
+  border: 1px solid;
+  padding: 20px;
+}
+
+p {
+  margin: 0;
+}
