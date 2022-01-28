@@ -12,7 +12,7 @@
     <main>
       <section class="random-game">
         <h3>What should you play?</h3>
-        <button>Random Game</button>
+        <button id="randomButton">Random Game</button>
       </section>
       <section class="find-game">
         <h3>Filter games to play</h3>
@@ -30,11 +30,23 @@
         </form>
       </section>
       <section class="search-result">
-        <h3>Search Result</h3>
-        <p>You should play...</p>
+        <h3>You should play...</h3>
+
+        <div id="gameName"></div>
+      </section>
+      <section id="birthdays">
+        <h2>Which Game Character has your birthday?</h2>
+        <form action="" id="birthday-form">
+          <input type="date" id="birthday" name="birthday" />
+          <button class="btn" type="submit">Search</button>
+        </form>
       </section>
     </main>
     <aside>
+      <section class="character-section">
+        <h3>Character of the Day</h3>
+        <div id="characterDayCtn"></div>
+      </section>
       <section class="chat">
         <h3>What everyone's playing</h3>
         <p>Tell everyone what game you're going to play next</p>
@@ -60,6 +72,10 @@
         </template>
       </section>
     </aside>
+    <footer>
+      <button id="dbDump">Pull Games to DB</button>
+      <button id="dbCharactersDump">Pull Characters to DB</button>
+    </footer>
   </body>
   <script src="js/index.js" type="module"></script>
 </html>

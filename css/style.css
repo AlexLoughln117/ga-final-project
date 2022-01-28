@@ -43,3 +43,19 @@ h1 {
 p {
   margin: 0;
 }
+
+#birthdays {
+  width: 100%;
+  border-top: 1px solid black;
+}
+
+.character-section {
+  padding: 0 15px;
+}
+
+#characterDayCtn {
+  width: 100%;
+}
+#characterDayCtn div {
+  width: 100%;
+}
