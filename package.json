@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "firebase": "^9.6.5",
     "http-server": "^14.0.0"
   }
 }

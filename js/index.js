@@ -49,7 +49,14 @@ import {
   push,
   onValue,
   update,
+  query,
+  orderByChild,
 } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+import {
+  getFirestore,
+  collection,
+  getDocs,
+} from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -68,8 +75,6 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const gamesDatabase = ref(db, 'games');
 const charactersDatabase = ref(db, 'characters');
-
-console.log(gamesDatabase);
 
 const sendGamesToDB = async () => {
   // use the push method to save data to the messages
@@ -160,25 +165,63 @@ function randomButton() {
 
 // Render a random Game
 
+const fetchMoreDetails = async (guid) => {
+  console.log(guid);
+  try {
+    const response = await fetch(
+      `https://cors-anywhere.herokuapp.com/https://www.giantbomb.com/api/game/${guid}/?api_key=5caa696b41ac3fc2a8a789a382f4337109e98366&format=json`,
+    );
+
+    if (response.ok) {
+      const { results } = await response.json();
+      console.log(results);
+      return results;
+    }
+    throw new Error(response.statusText);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 const createElementTemplateWrapper = document.querySelector('#gameName');
 
-function pickRandomGame(savedGames) {
+async function pickRandomGame(savedGames) {
   const gameValues = Object.values(savedGames);
   const singleGame = gameValues[Math.floor(Math.random() * gameValues.length)];
   const platforms = singleGame.platforms;
-
   const guid = singleGame.guid;
   const name = singleGame.name;
+  // const specificGame = await fetchMoreDetails(guid);
+  // const genres = specificGame.genres;
+  console.log(platforms);
 
   const sectionElement = document.createElement('section');
   const h2Element = document.createElement('h2');
   const mainImg = document.createElement('img');
+  const genreList = document.createElement('ul');
+  const platformList = document.createElement('ul');
 
-  h2Element.innerText = `Name: ${singleGame.name.toUpperCase()}`;
+  h2Element.innerText = `${name}`;
   mainImg.src = singleGame.image;
+  // genres.forEach(function (genre) {
+  //   console.log(genre.name);
+  //   var genreLi = document.createElement('LI');
+  //   var genreLiText = document.createTextNode(genre.name);
+  //   genreLi.appendChild(genreLiText);
+  //   genreList.appendChild(genreLi);
+  // });
+  platforms.forEach(function (platform) {
+    console.log(platform.name);
+    var platformLi = document.createElement('LI');
+    var platformLiText = document.createTextNode(platform.name);
+    platformLi.appendChild(platformLiText);
+    platformList.appendChild(platformLi);
+  });
 
   sectionElement.appendChild(h2Element);
   sectionElement.appendChild(mainImg);
+  sectionElement.appendChild(genreList);
+  sectionElement.appendChild(platformList);
 
   createElementTemplateWrapper.appendChild(sectionElement);
 }
@@ -250,10 +293,10 @@ getCharacterOfTheDay();
 const bdForm = document.querySelector('#birthday-form');
 const birthday = document.querySelector('#birthday');
 // Event
-bdForm.addEventListener('submit', getPostFromTextArea);
+bdForm.addEventListener('submit', getUserBirthday);
 
 // Execution
-function getPostFromTextArea(event) {
+function getUserBirthday(event) {
   event.preventDefault();
 
   const userBirthday = birthday.value;
@@ -267,11 +310,82 @@ function matchBirthdays(userBirthday) {
   onValue(charactersDatabase, (snapShot) => {
     const savedCharacter = snapShot.val();
     const characterValues = Object.values(savedCharacter);
-    const convertBirthday = userBirthday.toDateString();
+    // const convertBirthday = userBirthday.toDateString();
 
     let result = characterValues.filter((obj) => {
       return obj.birthday === userBirthday;
     });
-    console.log(convertBirthday);
+    console.log(`${userBirthday}`);
   });
+}
+
+// Function to go through every game in the database and match that game with the extra info and add it to the database
+
+async function expandGameInfoInDB() {
+  onValue(gamesDatabase, (snapShot) => {
+    const savedGames = snapShot.val();
+
+    Object.entries(savedGames).forEach(([key, value]) => {
+      const { guid } = value;
+      console.log(guid);
+      const specificGame = fetchMoreDetails(guid);
+      console.log(specificGame);
+    });
+  });
+}
+
+document
+  .getElementById('dbExtraDump')
+  .addEventListener('click', expandGameInfoInDB);
+
+//Function to search and match database with what the user has selected from the Dropdowns
+
+const gamesForm = document.querySelector('#find-game-form');
+const userPlatformInput = document.querySelector('#selectPlatform');
+
+gamesForm.addEventListener('submit', getUserPlatform);
+
+function getUserPlatform(event) {
+  event.preventDefault();
+
+  const userPlatform = userPlatformInput.value;
+  console.log(userPlatform);
+  matchPlatforms(userPlatform);
+
+  userPlatformInput.value = 'Platform';
+}
+
+function matchPlatforms(userPlatform) {
+  // onValue(gamesDatabase, (snapShot) => {
+  //   const savedGames = snapShot.val();
+  //   // You can use the arrow function expression:
+  //   var result = savedGames.find((obj) => {
+  //     // Returns the object where
+  //     // the given property has some value
+  //     return obj.guid === userPlatform;
+  //   });
+  //   console.log(result);
+  // });
+  // const newGamesDatabase = ref(db, 'games');
+  // console.log(query);
+  // snapshot.ref
+  //   .child('games')
+  //   .orderByChild('guid')
+  //   .equalTo(userPlatform)
+  //   .on('value', function (snapshot) {
+  //     console.log(snapshot.val());
+  //     snapshot.forEach(function (data) {
+  //       console.log(data.key);
+  //     });
+  //   });
+
+  // const myquery = gamesDatabase.orderByChild('name').equalTo('EGA-Roids');
+  // console.log(myquery);
+
+  gamesDatabase
+    .orderByChild('name')
+    .equalTo('EGA-Roids')
+    .on('child_added', function (snapshot) {
+      console.log(snapshot.key());
+    });
 }
