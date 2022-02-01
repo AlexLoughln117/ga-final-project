@@ -20,13 +20,21 @@
           <select name="platform" id="selectPlatform">
             <option disabled selected>Platform</option>
             <option value="PC">PC</option>
-            <option value="3030-16">3030-16</option>
+            <option value="Sega Master System">Sega Master System</option>
+            <option value="PlayStation">PlayStation</option>
+            <option value="PlayStation 2">PlayStation 2</option>
+            <option value="Game Boy Advance">Game Boy Advance</option>
+            <option value="GameCube">GameCube</option>
+            <option value="Xbox">Xbox</option>
+            <option value="Nintendo Switch">Nintendo Switch</option>
           </select>
-          <select name="time" id="">
+          <!-- <select name="time" id="">
             <option disabled selected>Time</option>
-          </select>
-          <select name="genre" id="">
+          </select> -->
+          <select name="genre" id="selectGenre">
             <option disabled selected>Genre</option>
+            <option value="Action">Action</option>
+            <option value="Shooter">Shooter</option>
           </select>
           <button class="btn" type="submit">Search</button>
         </form>
@@ -39,9 +47,38 @@
       <section id="birthdays">
         <h2>Which Game Character has your birthday?</h2>
         <form action="" id="birthday-form">
-          <input type="date" id="birthday" name="birthday" />
+          <input
+            type="text"
+            id="birthday"
+            name="birthday"
+            placeholder="Jan 31, 1980"
+          />
           <button class="btn" type="submit">Search</button>
         </form>
+        <div class="birthday-match-ctn"></div>
+        <template id="birthday-results-template">
+          <img id="birthday-result-image" src="" alt="" />
+          <h3 id="birthday-result-name">test</h3>
+          <button id="birthday-result-btn">Share to Feed</button>
+        </template>
+      </section>
+      <section id="textSearch">
+        <h2>Try Searching for a Specific Game</h2>
+        <form action="" id="textSearch-form">
+          <input
+            type="text"
+            id="userTextInput"
+            name="gameName"
+            placeholder="The Legend of Zelda"
+          />
+          <button class="btn" type="submit">Search</button>
+        </form>
+        <div class="text-search-result-ctn"></div>
+        <template id="text-search-results-template">
+          <div>
+            <p id="text-result-name">test</p>
+          </div>
+        </template>
       </section>
     </main>
     <aside>
@@ -50,26 +87,16 @@
         <div id="characterDayCtn"></div>
       </section>
       <section class="chat">
-        <h3>What everyone's playing</h3>
-        <p>Tell everyone what game you're going to play next</p>
+        <h3>Games Feed</h3>
+        <p>The game results everyone got:</p>
         <ul class="message-board"></ul>
-        <template>
+        <template id="game-results-template">
           <li>
-            <p>test</p>
-            <div>
-              <p aria-labelledby="number of votes">
-                votes: <span id="votes">0</span>
-              </p>
-              <button type="button" id="vote-up" aria-labelledby="vote up">
-                &#x1F44D;
-              </button>
-              <button type="button" id="vote-down" aria-labelledby="vote down">
-                &#x1F44E;
-              </button>
-              <button type="button" id="delete" aria-labelledby="delete">
-                &#x1F5D1;
-              </button>
-            </div>
+            <p id="result-name">test</p>
+            <p id="result-time"></p>
+            <button type="button" id="delete" aria-labelledby="delete">
+              &#x1F5D1;
+            </button>
           </li>
         </template>
       </section>
@@ -80,5 +107,7 @@
       <button id="dbExtraDump">Pull extra game info</button>
     </footer>
   </body>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script src="js/index.js" type="module"></script>
 </html>

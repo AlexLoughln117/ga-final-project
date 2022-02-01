@@ -44,7 +44,8 @@ p {
   margin: 0;
 }
 
-#birthdays {
+#birthdays,
+#textSearch {
   width: 100%;
   border-top: 1px solid black;
 }
@@ -60,4 +61,71 @@ p {
 }
 #characterDayCtn div {
   width: 100%;
+}
+.chat {
+  /* max-height: 300px;
+  overflow-y: scroll; */
+}
+.message-board {
+  width: 100%;
+  padding: 0 15px;
+  max-width: 90%;
+}
+.message-board li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+#gameName {
+  width: 100%;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+}
+
+#gameName img {
+  max-height: 150px;
+}
+
+#gameName div {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: space-between;
+  align-items: center;
+  width: 19.33%;
+  margin-bottom: 50px;
+  padding: 0 10px;
+}
+
+#gameName h2 {
+  margin-top: 0;
+}
+
+#gameName button {
+  height: 30px;
+}
+
+.birthday-match-ctn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.birthday-match-ctn img {
+  max-height: 150px;
+}
+
+.singlegame-random ul {
+  list-style: none;
+  display: flex;
+}
+
+.singlegame-random li {
+  margin-right: 10px;
 }

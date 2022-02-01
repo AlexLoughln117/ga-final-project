@@ -10,7 +10,6 @@ const fetchGiantBomb = async () => {
 
     if (response.ok) {
       const { results } = await response.json();
-      console.log(results);
       return results;
     }
     throw new Error(response.statusText);
@@ -24,12 +23,43 @@ const fetchGiantBombCharacters = async () => {
     const response = await fetch(
       'https://cors-anywhere.herokuapp.com/https://www.giantbomb.com/api/characters/?api_key=5caa696b41ac3fc2a8a789a382f4337109e98366&format=json',
     );
-    //https://www.giantbomb.com/api/characters/?api_key=[YOUR API KEY]
-    // To pull more games paginate the url http://www.giantbomb.com/api/games/?api_key=[APIKEY]&format=json&field_list=name&page=2
 
     if (response.ok) {
       const { results } = await response.json();
-      console.log(results);
+      return results;
+    }
+    throw new Error(response.statusText);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+const fetchMoreDetails = async (guid) => {
+  console.log(guid);
+  try {
+    const response = await fetch(
+      `https://cors-anywhere.herokuapp.com/https://www.giantbomb.com/api/game/${guid}/?api_key=5caa696b41ac3fc2a8a789a382f4337109e98366&format=json`,
+    );
+
+    if (response.ok) {
+      const { results } = await response.json();
+      return results;
+    }
+    throw new Error(response.statusText);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+const searchGiantBomb = async (userText) => {
+  // console.log(userText);
+  try {
+    const response = await fetch(
+      `https://cors-anywhere.herokuapp.com/https://www.giantbomb.com/api/search/?api_key=5caa696b41ac3fc2a8a789a382f4337109e98366&format=json&query=%22${userText}%22&resources=game`,
+    );
+
+    if (response.ok) {
+      const { results } = await response.json();
       return results;
     }
     throw new Error(response.statusText);
@@ -49,12 +79,21 @@ import {
   push,
   onValue,
   update,
-  query,
+  child,
   orderByChild,
+  orderByValue,
+  limitToLast,
+  equalTo,
 } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 import {
   getFirestore,
+  doc,
+  getDoc,
+  deleteDoc,
   collection,
+  addDoc,
+  query,
+  where,
   getDocs,
 } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
@@ -75,6 +114,11 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const gamesDatabase = ref(db, 'games');
 const charactersDatabase = ref(db, 'characters');
+const gameResultsDB = ref(db, 'gameResults');
+
+// FIRESTORE DATABASE
+
+const firebasedb = getFirestore();
 
 const sendGamesToDB = async () => {
   // use the push method to save data to the messages
@@ -82,19 +126,54 @@ const sendGamesToDB = async () => {
 
   const games = await fetchGiantBomb();
 
-  games.forEach((game) => {
-    push(gamesDatabase, {
+  for (const game of games) {
+    const platforms = game.platforms; //Replace the platforms foreach with a filter
+    const platformNames = [];
+    platforms.forEach((platform) => {
+      platformNames.push(platform.name);
+    });
+
+    const guid = game.guid;
+    const specificGame = await fetchMoreDetails(guid);
+    const genres = specificGame.genres; //Replace the platforms foreach with a filter
+    const genreNames = [];
+    genres.forEach((genre) => {
+      genreNames.push(genre.name);
+    });
+    console.log(genreNames);
+
+    // Send games to Firebase Database
+    // push(gamesDatabase, {
+    //   name: game.name,
+    //   platforms: platformNames,
+    //   description: game.description,
+    //   date: game.original_release_date,
+    //   guid: game.guid,
+    //   id: game.id,
+    //   image: game.image.small_url,
+    //   giantbombLink: game.site_detail_url,
+
+    // });
+
+    // Send games to FireStore Database
+    const docRef = addDoc(collection(firebasedb, 'games'), {
       name: game.name,
-      platforms: game.platforms,
+      platforms: platformNames,
       description: game.description,
       date: game.original_release_date,
       guid: game.guid,
       id: game.id,
       image: game.image.small_url,
       giantbombLink: game.site_detail_url,
+      genres: genreNames,
     });
-  });
+
+    if (game === 5) {
+      break;
+    }
+  }
 };
+
 const sendCharactersToDB = async () => {
   // use the push method to save data to the messages
   // https://firebase.google.com/docs/reference/js/database#push
@@ -102,7 +181,7 @@ const sendCharactersToDB = async () => {
   const characters = await fetchGiantBombCharacters();
 
   characters.forEach((character) => {
-    push(charactersDatabase, {
+    const docRef = addDoc(collection(firebasedb, 'characters'), {
       name: character.name,
       real_name: character.real_name,
       description: character.description,
@@ -112,6 +191,17 @@ const sendCharactersToDB = async () => {
       gender: character.gender,
       image: character.image.small_url,
     });
+
+    // push(charactersDatabase, {
+    //   name: character.name,
+    //   real_name: character.real_name,
+    //   description: character.description,
+    //   birthday: character.birthday,
+    //   guid: character.guid,
+    //   id: character.id,
+    //   gender: character.gender,
+    //   image: character.image.small_url,
+    // });
   });
 };
 
@@ -125,7 +215,6 @@ function getPostsFromDb() {
   onValue(gamesDatabase, (snapShot) => {
     const savedGames = snapShot.val();
     renderGames(savedGames);
-    // renderRandomGame(savedGames);
   });
 }
 
@@ -140,7 +229,7 @@ function renderGames(savedGames) {
 }
 
 function renderGame({ key, name, guid, image }) {
-  console.log(`${name}:${guid},image:${image}`);
+  // console.log(`${name}:${guid},image:${image}`);
 }
 
 // On click of pull games to the DB
@@ -153,55 +242,55 @@ document
 // On click of Random Button show a game
 
 document.getElementById('randomButton').addEventListener('click', randomButton);
-// const gamesListElement = document.getElementById('gameName');
 
-function randomButton() {
+async function randomButton() {
   clearSearchResult();
+
   onValue(gamesDatabase, (snapShot) => {
     const savedGames = snapShot.val();
     pickRandomGame(savedGames);
   });
+
+  // Code to convert to use FireStore DB
+
+  // const gamesRef = collection(firebasedb, 'games');
+  // const querySnapshot = await getDocs(gamesRef);
+  // pickRandomGame(querySnapshot);
 }
 
 // Render a random Game
 
-const fetchMoreDetails = async (guid) => {
-  console.log(guid);
-  try {
-    const response = await fetch(
-      `https://cors-anywhere.herokuapp.com/https://www.giantbomb.com/api/game/${guid}/?api_key=5caa696b41ac3fc2a8a789a382f4337109e98366&format=json`,
-    );
-
-    if (response.ok) {
-      const { results } = await response.json();
-      console.log(results);
-      return results;
-    }
-    throw new Error(response.statusText);
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-
 const createElementTemplateWrapper = document.querySelector('#gameName');
 
 async function pickRandomGame(savedGames) {
+  // This uses the Realtime Database (not Firestore) as I was not able to replace the randomise part of it in time
+
+  // querySnapshot.forEach((doc) => {
+  //   const data = doc.data();
+  //   const name = data.name;
+  //   // console.log(name);
+  // });
+
   const gameValues = Object.values(savedGames);
   const singleGame = gameValues[Math.floor(Math.random() * gameValues.length)];
+
   const platforms = singleGame.platforms;
   const guid = singleGame.guid;
+  const id = singleGame.id;
   const name = singleGame.name;
+
   // const specificGame = await fetchMoreDetails(guid);
   // const genres = specificGame.genres;
-  console.log(platforms);
 
-  const sectionElement = document.createElement('section');
-  const h2Element = document.createElement('h2');
+  const divElement = document.createElement('div');
+  const h3Element = document.createElement('h3');
   const mainImg = document.createElement('img');
-  const genreList = document.createElement('ul');
+  // const genreList = document.createElement('ul');
   const platformList = document.createElement('ul');
+  const buttonElement = document.createElement('button');
 
-  h2Element.innerText = `${name}`;
+  divElement.classList.add('singlegame-random');
+  h3Element.innerText = `${name}`;
   mainImg.src = singleGame.image;
   // genres.forEach(function (genre) {
   //   console.log(genre.name);
@@ -211,28 +300,90 @@ async function pickRandomGame(savedGames) {
   //   genreList.appendChild(genreLi);
   // });
   platforms.forEach(function (platform) {
-    console.log(platform.name);
     var platformLi = document.createElement('LI');
-    var platformLiText = document.createTextNode(platform.name);
+    var platformLiText = document.createTextNode(platform);
     platformLi.appendChild(platformLiText);
     platformList.appendChild(platformLi);
   });
+  buttonElement.textContent = 'Share to Feed';
+  buttonElement.setAttribute('data-id', id);
+  buttonElement.setAttribute('data-gameName', name);
+  buttonElement.dataset.gameKey = id;
+  buttonElement.dataset.gameNameKey = name;
+  buttonElement.addEventListener('click', chooseGame);
 
-  sectionElement.appendChild(h2Element);
-  sectionElement.appendChild(mainImg);
-  sectionElement.appendChild(genreList);
-  sectionElement.appendChild(platformList);
+  divElement.appendChild(h3Element);
+  divElement.appendChild(mainImg);
+  // sectionElement.appendChild(genreList);
+  divElement.appendChild(platformList);
+  divElement.appendChild(buttonElement);
 
-  createElementTemplateWrapper.appendChild(sectionElement);
+  createElementTemplateWrapper.appendChild(divElement);
 }
+
+// Show all Game Results on the Sidebar
+// ----------------------------------------------------------
+
+window.addEventListener('DOMContentLoaded', getGameResults);
+const resultsTemplate = document.querySelector('#game-results-template');
+const resultsPostList = document.querySelector('.message-board');
+
+async function getGameResults() {
+  resultsPostList.innerHTML = '';
+
+  const gamesResultsRef = collection(firebasedb, 'gameResults');
+  const resultsQuerySnapshot = await getDocs(gamesResultsRef);
+  resultsQuerySnapshot.forEach((doc) => {
+    const data = doc.data();
+    const name = data.name;
+    const time = data.time;
+    const key = doc.id;
+    console.log(key);
+
+    const clone = resultsTemplate.content.cloneNode(true);
+    const p = clone.querySelector('#result-name');
+    const pTime = clone.querySelector('#result-time');
+    const deleteElement = clone.querySelector('#delete');
+    p.innerText = name;
+    pTime.innerText = time;
+    deleteElement.setAttribute('data-id', key);
+    deleteElement.addEventListener('click', deleteGameResult);
+
+    resultsPostList.append(clone);
+  });
+}
+
+// Delete Game results in the database
+//--------------------------------------------------
+
+function getGameResultId(event) {
+  const {
+    currentTarget: {
+      dataset: { id },
+    },
+  } = event;
+
+  return id;
+}
+
+async function deleteGameResult(event) {
+  const gameId = getGameResultId(event);
+
+  await deleteDoc(doc(firebasedb, 'gameResults', gameId));
+  getGameResults();
+}
+
+// Clear User's Search Result
+// ------------------------------------------------------------
 
 function clearSearchResult() {
   createElementTemplateWrapper.innerHTML = '';
 }
 
 // Show a new character every day
-
+// -----------------------------------------------------------------
 function getCharacterOfTheDay() {
+  // This uses the Realtime Database (not Firestore) as I was not able to replace the randomise part of it in time
   onValue(charactersDatabase, (snapShot) => {
     const savedCharacter = snapShot.val();
     pickRandomCharacter(savedCharacter);
@@ -246,14 +397,21 @@ function pickRandomCharacter(savedCharacter) {
   const characterValues = Object.values(savedCharacter);
   const singleCharacter =
     characterValues[Math.floor(Math.random() * characterValues.length)];
+  const characterBirthday = singleCharacter.birthday;
+  const characterDescription = singleCharacter.description;
 
   const sectionElement = document.createElement('section');
   const h2Element = document.createElement('h2');
   const description = document.createElement('div');
   const birthday = document.createElement('p');
   h2Element.innerText = `${singleCharacter.name}`;
-  birthday.innerText = `${singleCharacter.birthday}`;
-  description.innerHTML = `${singleCharacter.description}`;
+  if (characterBirthday !== undefined) {
+    birthday.innerText = `Birthday: ${characterBirthday}`;
+  }
+  if (characterDescription !== undefined) {
+    description.innerHTML = `${characterDescription}`;
+  }
+
   sectionElement.appendChild(h2Element);
   sectionElement.appendChild(birthday);
   sectionElement.appendChild(description);
@@ -262,6 +420,7 @@ function pickRandomCharacter(savedCharacter) {
 }
 
 // checks if one day has passed.
+// ----------------------------------------------------
 function hasOneDayPassed() {
   // get today's date. eg: "7/37/2007"
   var date = new Date().toLocaleDateString();
@@ -275,7 +434,6 @@ function hasOneDayPassed() {
   return true;
 }
 
-// some function which should run once a day
 function runOncePerDay() {
   if (!hasOneDayPassed()) return false;
 
@@ -289,7 +447,8 @@ getCharacterOfTheDay();
 // Get Users birthday and match to Character
 //
 // Pull the date that is entered into the input / CREATE
-//
+//-------------------------------------------------------------------------------------------
+
 const bdForm = document.querySelector('#birthday-form');
 const birthday = document.querySelector('#birthday');
 // Event
@@ -306,86 +465,183 @@ function getUserBirthday(event) {
   birthday.value = '';
 }
 
-function matchBirthdays(userBirthday) {
-  onValue(charactersDatabase, (snapShot) => {
-    const savedCharacter = snapShot.val();
-    const characterValues = Object.values(savedCharacter);
-    // const convertBirthday = userBirthday.toDateString();
+async function matchBirthdays(userBirthday) {
+  const q = query(
+    collection(firebasedb, 'characters'),
+    where('birthday', '==', userBirthday),
+  );
+  const birthdayQuerySnapshot = await getDocs(q);
 
-    let result = characterValues.filter((obj) => {
-      return obj.birthday === userBirthday;
-    });
-    console.log(`${userBirthday}`);
+  renderBirthdayMatch(birthdayQuerySnapshot);
+}
+
+const birthdayResultsTemplate = document.querySelector(
+  '#birthday-results-template',
+);
+const birthdayResultsPostList = document.querySelector('.birthday-match-ctn');
+
+function renderBirthdayMatch(birthdayQuerySnapshot) {
+  birthdayResultsPostList.innerHTML = '';
+  birthdayQuerySnapshot.forEach((doc) => {
+    const data = doc.data();
+    const name = data.name;
+    const img = data.image;
+    const id = data.id;
+    const guid = data.guid;
+
+    console.log(name);
+
+    const clone = birthdayResultsTemplate.content.cloneNode(true);
+    const nameElement = clone.querySelector('#birthday-result-name');
+    const imgElement = clone.querySelector('#birthday-result-image');
+    const buttonElement = clone.querySelector('#birthday-result-btn');
+    nameElement.innerText = name;
+    imgElement.src = img;
+    buttonElement.setAttribute('data-id', id);
+    buttonElement.setAttribute('data-gameName', name);
+    buttonElement.dataset.gameKey = id;
+    buttonElement.dataset.gameNameKey = name;
+    buttonElement.addEventListener('click', chooseGame);
+
+    birthdayResultsPostList.append(clone);
   });
 }
 
-// Function to go through every game in the database and match that game with the extra info and add it to the database
+// Text Search
+// Get text entered into input and compare to database and return rseults
+// Can't use the database for this as Firestore does not have a 'Contains' option.
+// -----------------------------------------------------------------------------------------------
 
-async function expandGameInfoInDB() {
-  onValue(gamesDatabase, (snapShot) => {
-    const savedGames = snapShot.val();
+const textSearchForm = document.querySelector('#textSearch-form');
+const textInput = document.querySelector('#userTextInput');
+// Event
+textSearchForm.addEventListener('submit', getUserTextInput);
 
-    Object.entries(savedGames).forEach(([key, value]) => {
-      const { guid } = value;
-      console.log(guid);
-      const specificGame = fetchMoreDetails(guid);
-      console.log(specificGame);
-    });
-  });
+// Execution
+function getUserTextInput(event) {
+  event.preventDefault();
+
+  let userText = textInput.value;
+  userText = encodeURIComponent(userText);
+  console.log(userText);
+  matchTextSearch(userText);
+
+  textInput.value = '';
 }
 
-document
-  .getElementById('dbExtraDump')
-  .addEventListener('click', expandGameInfoInDB);
+const textSearchResultsTemplate = document.querySelector(
+  '#text-search-results-template',
+);
+const textSearchResultsPostList = document.querySelector(
+  '.text-search-result-ctn',
+);
+
+async function matchTextSearch(userText) {
+  const giantbombSearchResults = await searchGiantBomb(userText);
+  giantbombSearchResults.forEach((giantbombSearchResult) => {
+    console.log(giantbombSearchResult.name);
+    const name = giantbombSearchResult.name;
+    const clone = textSearchResultsTemplate.content.cloneNode(true);
+    const nameElement = clone.querySelector('#text-result-name');
+    nameElement.innerText = name;
+    textSearchResultsPostList.append(clone);
+  });
+  //https://www.giantbomb.com/api/search/?api_key=5caa696b41ac3fc2a8a789a382f4337109e98366&format=json&query=%22elder%20scrolls%20online%22&resources=game
+}
 
 //Function to search and match database with what the user has selected from the Dropdowns
+// -------------------------------------------------------------------------------------------------------
 
 const gamesForm = document.querySelector('#find-game-form');
 const userPlatformInput = document.querySelector('#selectPlatform');
+const userGenreInput = document.querySelector('#selectGenre');
 
 gamesForm.addEventListener('submit', getUserPlatform);
 
 function getUserPlatform(event) {
   event.preventDefault();
 
+  clearSearchResult();
   const userPlatform = userPlatformInput.value;
-  console.log(userPlatform);
-  matchPlatforms(userPlatform);
+  const userGenre = userGenreInput.value;
+  matchPlatforms(userPlatform, userGenre);
 
   userPlatformInput.value = 'Platform';
+  userGenreInput.value = 'Genre';
 }
 
-function matchPlatforms(userPlatform) {
-  // onValue(gamesDatabase, (snapShot) => {
-  //   const savedGames = snapShot.val();
-  //   // You can use the arrow function expression:
-  //   var result = savedGames.find((obj) => {
-  //     // Returns the object where
-  //     // the given property has some value
-  //     return obj.guid === userPlatform;
-  //   });
-  //   console.log(result);
-  // });
-  // const newGamesDatabase = ref(db, 'games');
-  // console.log(query);
-  // snapshot.ref
-  //   .child('games')
-  //   .orderByChild('guid')
-  //   .equalTo(userPlatform)
-  //   .on('value', function (snapshot) {
-  //     console.log(snapshot.val());
-  //     snapshot.forEach(function (data) {
-  //       console.log(data.key);
-  //     });
-  //   });
+async function matchPlatforms(userPlatform, userGenre) {
+  console.log(userGenre);
+  const q = query(
+    collection(firebasedb, 'games'),
+    where('platforms', 'array-contains', userPlatform),
+    // where('genres', 'array-contains', userGenre),
+  );
+  const filterQuerySnapshot = await getDocs(q);
 
-  // const myquery = gamesDatabase.orderByChild('name').equalTo('EGA-Roids');
-  // console.log(myquery);
-
-  gamesDatabase
-    .orderByChild('name')
-    .equalTo('EGA-Roids')
-    .on('child_added', function (snapshot) {
-      console.log(snapshot.key());
-    });
+  renderFilterGame(filterQuerySnapshot);
 }
+
+function renderFilterGame(filterQuerySnapshot) {
+  filterQuerySnapshot.forEach((doc) => {
+    const data = doc.data();
+    const name = data.name;
+    const id = data.id;
+    const guid = data.guid;
+    const imgURL = data.image;
+    const divElement = document.createElement('div');
+    const h3Element = document.createElement('h3');
+    const selectButton = document.createElement('button');
+    const mainImg = document.createElement('img');
+
+    h3Element.innerText = name;
+    selectButton.innerHTML = 'Choose this game';
+    divElement.setAttribute('data-guid', guid);
+    selectButton.setAttribute('data-id', id);
+    selectButton.setAttribute('data-gameName', name);
+    selectButton.dataset.gameKey = id;
+    selectButton.dataset.gameNameKey = name;
+    selectButton.addEventListener('click', chooseGame);
+
+    mainImg.src = imgURL;
+
+    divElement.appendChild(mainImg);
+    divElement.appendChild(h3Element);
+    divElement.appendChild(selectButton);
+
+    createElementTemplateWrapper.appendChild(divElement);
+  });
+}
+
+function getGameId(event) {
+  return event.target.dataset.gameKey;
+}
+function getGameName(event) {
+  return event.target.dataset.gameNameKey;
+}
+
+function chooseGame(event, gameName) {
+  // const selectedGameId = getGameId(event);
+  const selectedGameName = getGameName(event);
+  let d = new Date();
+  let date = d.getDate();
+  let month = d.getMonth() + 1; // Since getMonth() returns month from 0-11 not 1-12
+  let year = d.getFullYear();
+  let dateStr = date + '/' + month + '/' + year;
+
+  console.log(selectedGameName);
+
+  const docRef = addDoc(collection(firebasedb, 'gameResults'), {
+    name: selectedGameName,
+    time: dateStr,
+  });
+
+  getGameResults();
+}
+
+const gamesResultsRef = collection(firebasedb, 'games');
+const resultsQuerySnapshot = await getDocs(gamesResultsRef);
+resultsQuerySnapshot.forEach((doc) => {
+  const data = doc.data();
+  console.log(data.name);
+});
