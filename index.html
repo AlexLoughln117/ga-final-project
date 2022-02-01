@@ -53,6 +53,12 @@
             name="birthday"
             placeholder="Jan 31, 1980"
           />
+          <input
+            type="date"
+            id="birthdayPicker"
+            name="birthday"
+            placeholder="Jan 31, 1980"
+          />
           <button class="btn" type="submit">Search</button>
         </form>
         <div class="birthday-match-ctn"></div>
@@ -76,7 +82,9 @@
         <div class="text-search-result-ctn"></div>
         <template id="text-search-results-template">
           <div>
-            <p id="text-result-name">test</p>
+            <img id="text-result-img" src="" alt="" />
+            <h3 id="text-result-name">test</h3>
+            <button id="text-result-btn">Share to Feed</button>
           </div>
         </template>
       </section>
@@ -87,8 +95,8 @@
         <div id="characterDayCtn"></div>
       </section>
       <section class="chat">
-        <h3>Games Feed</h3>
-        <p>The game results everyone got:</p>
+        <h3>Feed</h3>
+        <p>See the games and characters that everyone else is sharing:</p>
         <ul class="message-board"></ul>
         <template id="game-results-template">
           <li>

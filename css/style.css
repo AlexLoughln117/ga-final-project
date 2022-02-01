@@ -78,18 +78,25 @@ p {
   margin-bottom: 14px;
 }
 
-#gameName {
+.text-search-result-ctn {
+  margin-top: 25px;
+}
+
+#gameName,
+.text-search-result-ctn {
   width: 100%;
   display: flex;
   flex-flow: row wrap;
   justify-content: center;
 }
 
-#gameName img {
+#gameName img,
+.text-search-result-ctn img {
   max-height: 150px;
 }
 
-#gameName div {
+#gameName div,
+.text-search-result-ctn div {
   display: flex;
   flex-direction: column;
   text-align: center;
@@ -100,11 +107,8 @@ p {
   padding: 0 10px;
 }
 
-#gameName h2 {
-  margin-top: 0;
-}
-
-#gameName button {
+#gameName button,
+.text-search-result-ctn button {
   height: 30px;
 }
 
@@ -121,9 +125,14 @@ p {
   max-height: 150px;
 }
 
+#gameName .singlegame-random {
+  width: 50%;
+}
+
 .singlegame-random ul {
   list-style: none;
   display: flex;
+  padding: 0;
 }
 
 .singlegame-random li {

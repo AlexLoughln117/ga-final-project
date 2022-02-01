@@ -175,9 +175,6 @@ const sendGamesToDB = async () => {
 };
 
 const sendCharactersToDB = async () => {
-  // use the push method to save data to the messages
-  // https://firebase.google.com/docs/reference/js/database#push
-
   const characters = await fetchGiantBombCharacters();
 
   characters.forEach((character) => {
@@ -191,17 +188,6 @@ const sendCharactersToDB = async () => {
       gender: character.gender,
       image: character.image.small_url,
     });
-
-    // push(charactersDatabase, {
-    //   name: character.name,
-    //   real_name: character.real_name,
-    //   description: character.description,
-    //   birthday: character.birthday,
-    //   guid: character.guid,
-    //   id: character.id,
-    //   gender: character.gender,
-    //   image: character.image.small_url,
-    // });
   });
 };
 
@@ -538,12 +524,26 @@ const textSearchResultsPostList = document.querySelector(
 
 async function matchTextSearch(userText) {
   const giantbombSearchResults = await searchGiantBomb(userText);
+  textSearchResultsPostList.innerHTML = '';
   giantbombSearchResults.forEach((giantbombSearchResult) => {
     console.log(giantbombSearchResult.name);
     const name = giantbombSearchResult.name;
+    const img = giantbombSearchResult.image;
+    const imgURl = img.small_url;
+    let resultId = giantbombSearchResult.id;
+    resultId = resultId.toString();
+    console.log(imgURl);
     const clone = textSearchResultsTemplate.content.cloneNode(true);
     const nameElement = clone.querySelector('#text-result-name');
+    const buttonElement = clone.querySelector('#text-result-btn');
+    const imgElement = clone.querySelector('#text-result-img');
     nameElement.innerText = name;
+    imgElement.src = imgURl;
+    buttonElement.setAttribute('data-id', resultId);
+    buttonElement.setAttribute('data-gameName', name);
+    buttonElement.dataset.gameKey = resultId;
+    buttonElement.dataset.gameNameKey = name;
+    buttonElement.addEventListener('click', chooseGame);
     textSearchResultsPostList.append(clone);
   });
   //https://www.giantbomb.com/api/search/?api_key=5caa696b41ac3fc2a8a789a382f4337109e98366&format=json&query=%22elder%20scrolls%20online%22&resources=game
