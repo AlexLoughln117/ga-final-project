@@ -21,12 +21,19 @@
             <option disabled selected>Platform</option>
             <option value="PC">PC</option>
             <option value="Sega Master System">Sega Master System</option>
+            <option value="Nintendo Entertainment System">
+              Nintendo Entertainment System
+            </option>
             <option value="PlayStation">PlayStation</option>
             <option value="PlayStation 2">PlayStation 2</option>
             <option value="Game Boy Advance">Game Boy Advance</option>
             <option value="GameCube">GameCube</option>
             <option value="Xbox">Xbox</option>
             <option value="Nintendo Switch">Nintendo Switch</option>
+            <option value="Xbox 360">Xbox 360</option>
+            <option value="iPhone">iPhone</option>
+            <option value="Wii U">Wii U</option>
+            <option value="Xbox One">Xbox One</option>
           </select>
           <!-- <select name="time" id="">
             <option disabled selected>Time</option>
@@ -53,12 +60,12 @@
             name="birthday"
             placeholder="Jan 31, 1980"
           />
-          <input
+          <!-- <input
             type="date"
-            id="birthdayPicker"
+            id="birthday"
             name="birthday"
             placeholder="Jan 31, 1980"
-          />
+          /> -->
           <button class="btn" type="submit">Search</button>
         </form>
         <div class="birthday-match-ctn"></div>
@@ -101,10 +108,10 @@
         <template id="game-results-template">
           <li>
             <p id="result-name">test</p>
-            <p id="result-time"></p>
             <button type="button" id="delete" aria-labelledby="delete">
               &#x1F5D1;
             </button>
+            <p id="result-time"></p>
           </li>
         </template>
       </section>

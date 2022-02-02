@@ -1,74 +1,9 @@
-// import { fetchGiantBomb } from './giantbomb.js';
-
-const fetchGiantBomb = async () => {
-  try {
-    const response = await fetch(
-      'https://cors-anywhere.herokuapp.com/https://www.giantbomb.com/api/games/?api_key=5caa696b41ac3fc2a8a789a382f4337109e98366&format=json',
-    );
-    //https://www.giantbomb.com/api/characters/?api_key=[YOUR API KEY]
-    // To pull more games paginate the url http://www.giantbomb.com/api/games/?api_key=[APIKEY]&format=json&field_list=name&page=2
-
-    if (response.ok) {
-      const { results } = await response.json();
-      return results;
-    }
-    throw new Error(response.statusText);
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-
-const fetchGiantBombCharacters = async () => {
-  try {
-    const response = await fetch(
-      'https://cors-anywhere.herokuapp.com/https://www.giantbomb.com/api/characters/?api_key=5caa696b41ac3fc2a8a789a382f4337109e98366&format=json',
-    );
-
-    if (response.ok) {
-      const { results } = await response.json();
-      return results;
-    }
-    throw new Error(response.statusText);
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-
-const fetchMoreDetails = async (guid) => {
-  console.log(guid);
-  try {
-    const response = await fetch(
-      `https://cors-anywhere.herokuapp.com/https://www.giantbomb.com/api/game/${guid}/?api_key=5caa696b41ac3fc2a8a789a382f4337109e98366&format=json`,
-    );
-
-    if (response.ok) {
-      const { results } = await response.json();
-      return results;
-    }
-    throw new Error(response.statusText);
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-
-const searchGiantBomb = async (userText) => {
-  // console.log(userText);
-  try {
-    const response = await fetch(
-      `https://cors-anywhere.herokuapp.com/https://www.giantbomb.com/api/search/?api_key=5caa696b41ac3fc2a8a789a382f4337109e98366&format=json&query=%22${userText}%22&resources=game`,
-    );
-
-    if (response.ok) {
-      const { results } = await response.json();
-      return results;
-    }
-    throw new Error(response.statusText);
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-
-// await fetchGiantBomb();
+import {
+  fetchGiantBomb,
+  fetchGiantBombCharacters,
+  fetchMoreDetails,
+  searchGiantBomb,
+} from './giantbomb.js';
 
 // Connect to Firebase
 
@@ -134,13 +69,13 @@ const sendGamesToDB = async () => {
     });
 
     const guid = game.guid;
-    const specificGame = await fetchMoreDetails(guid);
-    const genres = specificGame.genres; //Replace the platforms foreach with a filter
-    const genreNames = [];
-    genres.forEach((genre) => {
-      genreNames.push(genre.name);
-    });
-    console.log(genreNames);
+    // const specificGame = await fetchMoreDetails(guid);
+    // const genres = specificGame.genres; //Replace the platforms foreach with a filter
+    // const genreNames = [];
+    // genres.forEach((genre) => {
+    //   genreNames.push(genre.name);
+    // });
+    // console.log(genreNames);
 
     // Send games to Firebase Database
     // push(gamesDatabase, {
@@ -152,10 +87,11 @@ const sendGamesToDB = async () => {
     //   id: game.id,
     //   image: game.image.small_url,
     //   giantbombLink: game.site_detail_url,
-
+    iPhone;
+    iPhone;
     // });
 
-    // Send games to FireStore Database
+    //  Send games to FireStore Database
     const docRef = addDoc(collection(firebasedb, 'games'), {
       name: game.name,
       platforms: platformNames,
@@ -165,10 +101,10 @@ const sendGamesToDB = async () => {
       id: game.id,
       image: game.image.small_url,
       giantbombLink: game.site_detail_url,
-      genres: genreNames,
+      //genres: genreNames,
     });
 
-    if (game === 5) {
+    if (game == 5) {
       break;
     }
   }
@@ -190,33 +126,6 @@ const sendCharactersToDB = async () => {
     });
   });
 };
-
-// Show all games in the DB
-//Event
-window.addEventListener('DOMContentLoaded', getPostsFromDb);
-
-//Execution
-function getPostsFromDb() {
-  //  https:firebase.google.com/docs/reference/js/database#onvalue
-  onValue(gamesDatabase, (snapShot) => {
-    const savedGames = snapShot.val();
-    renderGames(savedGames);
-  });
-}
-
-function updateGameEntries(savedGames) {}
-
-function renderGames(savedGames) {
-  Object.entries(savedGames).forEach(([key, value]) => {
-    const { name, guid, image } = value;
-
-    renderGame({ key, name, guid, image });
-  });
-}
-
-function renderGame({ key, name, guid, image }) {
-  // console.log(`${name}:${guid},image:${image}`);
-}
 
 // On click of pull games to the DB
 
@@ -265,26 +174,26 @@ async function pickRandomGame(savedGames) {
   const id = singleGame.id;
   const name = singleGame.name;
 
-  // const specificGame = await fetchMoreDetails(guid);
-  // const genres = specificGame.genres;
+  const specificGame = await fetchMoreDetails(guid);
+  const genres = specificGame.genres;
 
   const divElement = document.createElement('div');
   const h3Element = document.createElement('h3');
   const mainImg = document.createElement('img');
-  // const genreList = document.createElement('ul');
+  const genreList = document.createElement('ul');
   const platformList = document.createElement('ul');
   const buttonElement = document.createElement('button');
 
   divElement.classList.add('singlegame-random');
   h3Element.innerText = `${name}`;
   mainImg.src = singleGame.image;
-  // genres.forEach(function (genre) {
-  //   console.log(genre.name);
-  //   var genreLi = document.createElement('LI');
-  //   var genreLiText = document.createTextNode(genre.name);
-  //   genreLi.appendChild(genreLiText);
-  //   genreList.appendChild(genreLi);
-  // });
+  genres.forEach(function (genre) {
+    console.log(genre.name);
+    var genreLi = document.createElement('LI');
+    var genreLiText = document.createTextNode(genre.name);
+    genreLi.appendChild(genreLiText);
+    genreList.appendChild(genreLi);
+  });
   platforms.forEach(function (platform) {
     var platformLi = document.createElement('LI');
     var platformLiText = document.createTextNode(platform);
@@ -300,7 +209,7 @@ async function pickRandomGame(savedGames) {
 
   divElement.appendChild(h3Element);
   divElement.appendChild(mainImg);
-  // sectionElement.appendChild(genreList);
+  divElement.appendChild(genreList);
   divElement.appendChild(platformList);
   divElement.appendChild(buttonElement);
 
@@ -366,7 +275,7 @@ function clearSearchResult() {
   createElementTemplateWrapper.innerHTML = '';
 }
 
-// Show a new character every day
+// Get a random character from the database
 // -----------------------------------------------------------------
 function getCharacterOfTheDay() {
   // This uses the Realtime Database (not Firestore) as I was not able to replace the randomise part of it in time
@@ -378,6 +287,9 @@ function getCharacterOfTheDay() {
 
 const createCharacterTemplateWrapper =
   document.querySelector('#characterDayCtn');
+
+// Display random character to the sidebar
+// -----------------------------------------------------------------
 
 function pickRandomCharacter(savedCharacter) {
   const characterValues = Object.values(savedCharacter);
@@ -405,25 +317,20 @@ function pickRandomCharacter(savedCharacter) {
   createCharacterTemplateWrapper.appendChild(sectionElement);
 }
 
-// checks if one day has passed.
+// Function to check if one day has passed - does not work?
 // ----------------------------------------------------
 function hasOneDayPassed() {
-  // get today's date. eg: "7/37/2007"
   var date = new Date().toLocaleDateString();
 
-  // if there's a date in localstorage and it's equal to the above:
-  // inferring a day has yet to pass since both dates are equal.
   if (localStorage.yourapp_date == date) return false;
 
-  // this portion of logic occurs when a day has passed
   localStorage.yourapp_date = date;
   return true;
 }
 
+// If one day has passed run get character again
 function runOncePerDay() {
   if (!hasOneDayPassed()) return false;
-
-  // your code below
   getCharacterOfTheDay();
 }
 
@@ -445,7 +352,6 @@ function getUserBirthday(event) {
   event.preventDefault();
 
   const userBirthday = birthday.value;
-  console.log(userBirthday);
   matchBirthdays(userBirthday);
 
   birthday.value = '';
@@ -528,17 +434,17 @@ async function matchTextSearch(userText) {
   giantbombSearchResults.forEach((giantbombSearchResult) => {
     console.log(giantbombSearchResult.name);
     const name = giantbombSearchResult.name;
-    const img = giantbombSearchResult.image;
-    const imgURl = img.small_url;
+    let img = giantbombSearchResult.image;
+    img = img.small_url;
     let resultId = giantbombSearchResult.id;
     resultId = resultId.toString();
-    console.log(imgURl);
+    console.log(img);
     const clone = textSearchResultsTemplate.content.cloneNode(true);
     const nameElement = clone.querySelector('#text-result-name');
     const buttonElement = clone.querySelector('#text-result-btn');
     const imgElement = clone.querySelector('#text-result-img');
     nameElement.innerText = name;
-    imgElement.src = imgURl;
+    imgElement.src = img;
     buttonElement.setAttribute('data-id', resultId);
     buttonElement.setAttribute('data-gameName', name);
     buttonElement.dataset.gameKey = resultId;

@@ -4,6 +4,10 @@ body {
   justify-content: space-between;
 }
 
+h3 {
+  font-size: 1.6rem;
+}
+
 main {
   width: 69%;
   border: 1px solid;
@@ -38,6 +42,9 @@ h1 {
   width: 100%;
   border: 1px solid;
   padding: 20px;
+  font-size: 2.2rem;
+  background-color: #19191a;
+  color: #fff;
 }
 
 p {
@@ -52,6 +59,8 @@ p {
 
 .character-section {
   padding: 0 15px;
+  border-bottom: 1px solid;
+  padding-bottom: 2em;
 }
 
 #characterDayCtn {
@@ -76,6 +85,12 @@ p {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 14px;
+  flex-flow: row wrap;
+  align-items: center;
+}
+
+#result-time {
+  width: 100%;
 }
 
 .text-search-result-ctn {
