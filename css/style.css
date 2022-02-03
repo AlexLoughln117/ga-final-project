@@ -153,3 +153,7 @@ p {
 .singlegame-random li {
   margin-right: 10px;
 }
+
+footer {
+  display: none;
+}
