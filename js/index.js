@@ -13,12 +13,6 @@ import {
   ref,
   push,
   onValue,
-  update,
-  child,
-  orderByChild,
-  orderByValue,
-  limitToLast,
-  equalTo,
 } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 import {
   getFirestore,
@@ -69,6 +63,9 @@ const sendGamesToDB = async () => {
     });
 
     const guid = game.guid;
+    //Code below is used to match game with the extra data--------
+    //Commented out as it can cause API limits so only used when necesssary.
+    //---------------------------------------------------
     // const specificGame = await fetchMoreDetails(guid);
     // const genres = specificGame.genres; //Replace the platforms foreach with a filter
     // const genreNames = [];
@@ -77,7 +74,8 @@ const sendGamesToDB = async () => {
     // });
     // console.log(genreNames);
 
-    // Send games to Firebase Database
+    // Send games to Firebase Database-----------------------
+    //-------------------------------------------------
     // push(gamesDatabase, {
     //   name: game.name,
     //   platforms: platformNames,
@@ -87,11 +85,10 @@ const sendGamesToDB = async () => {
     //   id: game.id,
     //   image: game.image.small_url,
     //   giantbombLink: game.site_detail_url,
-    iPhone;
-    iPhone;
     // });
 
     //  Send games to FireStore Database
+    //-------------------------------------------------
     const docRef = addDoc(collection(firebasedb, 'games'), {
       name: game.name,
       platforms: platformNames,
@@ -128,6 +125,7 @@ const sendCharactersToDB = async () => {
 };
 
 // On click of pull games to the DB
+//-------------------------------------------------
 
 document.getElementById('dbDump').addEventListener('click', sendGamesToDB);
 document
@@ -135,6 +133,7 @@ document
   .addEventListener('click', sendCharactersToDB);
 
 // On click of Random Button show a game
+//-------------------------------------------------
 
 document.getElementById('randomButton').addEventListener('click', randomButton);
 
@@ -154,12 +153,13 @@ async function randomButton() {
 }
 
 // Render a random Game
+//-------------------------------------------------
 
 const createElementTemplateWrapper = document.querySelector('#gameName');
 
 async function pickRandomGame(savedGames) {
   // This uses the Realtime Database (not Firestore) as I was not able to replace the randomise part of it in time
-
+  //-------------------------------------------------
   // querySnapshot.forEach((doc) => {
   //   const data = doc.data();
   //   const name = data.name;
